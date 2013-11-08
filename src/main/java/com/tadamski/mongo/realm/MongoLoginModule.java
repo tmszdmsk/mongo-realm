@@ -56,11 +56,8 @@ public class MongoLoginModule extends AppservPasswordLoginModule {
             final String passwordProperty = mongoRealm.getProperty(MongoRealm.PASSWORD_PROPERTY);
             final String hashFunction = mongoRealm.getProperty(MongoRealm.HASH_FUNCTION);
 
-            final MessageDigest digester = MessageDigest.getInstance(hashFunction);
-            byte[] passwordAsBytesArray = Charset.forName("UTF-8").encode(CharBuffer.wrap(password)).array();
-            final byte[] digest = digester.digest(passwordAsBytesArray);
-            String digestHex = digestToHex(digest);
-            final DBObject query = QueryBuilder.start(loginProperty).is(login).and(passwordProperty).is(digestHex).get();
+            String hashedPassword = PasswordHasher.hash(password, hashFunction);
+            final DBObject query = QueryBuilder.start(loginProperty).is(login).and(passwordProperty).is(hashedPassword).get();
             DBObject userWithGivenLoginAndPassword = mongoRealm.getMongoCollection().findOne(query);
             final boolean userFound = userWithGivenLoginAndPassword != null;
             return userFound;
@@ -68,18 +65,4 @@ public class MongoLoginModule extends AppservPasswordLoginModule {
             throw new RuntimeException(ex);
         }
     }
-
-    private String digestToHex(byte[] digest) {
-        StringBuilder sb = new StringBuilder();
-        for (byte b : digest) {
-            String hex = Integer.toHexString(0xFF & b);
-            if (hex.length() == 1) {
-                // could use a for loop, but we're only dealing with a single byte
-                sb.append('0');
-            }
-            sb.append(hex);
-        }
-        return sb.toString();
-    }
-
 }
