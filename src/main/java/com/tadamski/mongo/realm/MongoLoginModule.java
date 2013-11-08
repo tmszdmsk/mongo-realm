@@ -13,27 +13,23 @@ import java.util.Enumeration;
 import java.util.List;
 import javax.security.auth.login.LoginException;
 
-public class MongoAppservLoginModule extends AppservPasswordLoginModule {
+public class MongoLoginModule extends AppservPasswordLoginModule {
 
     private DBCollection collection;
 
-    public MongoAppservLoginModule() throws UnknownHostException {
+    public MongoLoginModule() throws UnknownHostException {
         collection = new MongoClient().getDB("users").getCollection("users");
     }
 
     @Override
     protected void authenticateUser() throws LoginException {
-        String _password = new String(_passwd);
-        System.out.println("MyRealm LoginModule authenticateUser(), _username:"
-                + _username + ", _password:" + _password + ", _currentrealm:" + _currentRealm);
-
-        if (!(_currentRealm instanceof MongoAppservRealm)) {
+        if (!(_currentRealm instanceof MongoRealm)) {
             throw new LoginException("Realm not MyRealm. Check 'login.conf'.");
         }
-        MongoAppservRealm myRealm = (MongoAppservRealm) _currentRealm;
+        MongoRealm mongoRealm = (MongoRealm) _currentRealm;
 
         // Authenticate User
-        if (!doAuthentication(_username, _password)) {
+        if (!doAuthentication(_username, _passwd)) {
             //Login failed
             throw new LoginException("MyRealm LoginModule: Login Failed for user " + _username);
         }
@@ -44,7 +40,7 @@ public class MongoAppservLoginModule extends AppservPasswordLoginModule {
         // Get group names for the authenticated user from the Realm class
         Enumeration enumeration = null;
         try {
-            enumeration = myRealm.getGroupNames(_username);
+            enumeration = mongoRealm.getGroupNames(_username);
         } catch (InvalidOperationException e) {
             throw new LoginException("InvalidOperationException was thrown for getGroupNames() on MyRealm");
         } catch (NoSuchUserException e) {
@@ -69,7 +65,7 @@ public class MongoAppservLoginModule extends AppservPasswordLoginModule {
     /**
      * Performs the authentication.
      */
-    private boolean doAuthentication(String user, String password) {
+    private boolean doAuthentication(String user, char[] password) {
         DBObject findOne = collection.findOne(QueryBuilder.start("username").is(user).and("password").is(password).get());
         return findOne != null;
     }
