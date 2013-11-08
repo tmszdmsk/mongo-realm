@@ -30,6 +30,7 @@ public class MongoRealm extends AppservRealm {
     public static final String LOGIN_PROPERTY = "login.property";
     public static final String PASSWORD_PROPERTY = "password.property";
     public static final String GROUPS_PROPERTY = "groups.property";
+    public static final String HASH_FUNCTION = "hash.function";
     public static final String JAAS_CONTEXT = "jaas-context";
 
     public static final String AUTH_TYPE = "MongoAuth";
@@ -41,6 +42,7 @@ public class MongoRealm extends AppservRealm {
     private String loginProperty;
     private String passwordProperty;
     private String groupsProperty;
+    private String hashFunction;
 
     @Override
     protected void init(Properties properties) throws BadRealmException, NoSuchRealmException {
@@ -51,6 +53,8 @@ public class MongoRealm extends AppservRealm {
         loginProperty = properties.getProperty(LOGIN_PROPERTY, "login");
         passwordProperty = properties.getProperty(PASSWORD_PROPERTY, "password");
         groupsProperty = properties.getProperty(GROUPS_PROPERTY, "groups");
+        //SUPPORTED: MD2, MD5, SHA-1, SHA-256, SHA-384, and SHA-512
+        hashFunction = properties.getProperty(GROUPS_PROPERTY, "SHA-512");
 
         setProperty(MONGO_HOSTNAME, hostname);
         setProperty(MONGO_PORT, port.toString());
@@ -59,6 +63,7 @@ public class MongoRealm extends AppservRealm {
         setProperty(LOGIN_PROPERTY, loginProperty);
         setProperty(PASSWORD_PROPERTY, passwordProperty);
         setProperty(GROUPS_PROPERTY, groupsProperty);
+        setProperty(HASH_FUNCTION, hashFunction);
         try {
             collection = new MongoClient(hostname, port).getDB(dbName).getCollection(collectionName);
             String propJaasContext = properties.getProperty(JAAS_CONTEXT);
@@ -69,8 +74,8 @@ public class MongoRealm extends AppservRealm {
             throw new RuntimeException(ex);
         }
     }
-    
-    public DBCollection getMongoCollection(){
+
+    public DBCollection getMongoCollection() {
         return collection;
     }
 
@@ -82,11 +87,9 @@ public class MongoRealm extends AppservRealm {
             throw new NoSuchUserException(String.format("User with login property(%s)==%s not found", loginProperty, login));
         }
         BasicDBList groupsList = (BasicDBList) userObject.get(groupsProperty);
-        
+
         return new Vector<>(groupsList).elements();
     }
-    
-    
 
     @Override
     public String getAuthType() {

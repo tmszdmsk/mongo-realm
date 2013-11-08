@@ -5,6 +5,10 @@ import com.mongodb.QueryBuilder;
 import com.sun.appserv.security.AppservPasswordLoginModule;
 import com.sun.enterprise.security.auth.realm.InvalidOperationException;
 import com.sun.enterprise.security.auth.realm.NoSuchUserException;
+import java.nio.CharBuffer;
+import java.nio.charset.Charset;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
@@ -46,16 +50,36 @@ public class MongoLoginModule extends AppservPasswordLoginModule {
         commitUserAuthentication(authenticatedGroups);
     }
 
-    /**
-     * Performs the authentication.
-     */
     private boolean checkCredentials(MongoRealm mongoRealm, String login, char[] password) {
-        final String loginProperty = mongoRealm.getProperty(MongoRealm.LOGIN_PROPERTY);
-        final String passwordProperty = mongoRealm.getProperty(MongoRealm.PASSWORD_PROPERTY);
-        final DBObject query = QueryBuilder.start(loginProperty).is(login).and(passwordProperty).is(password).get();
-        DBObject userWithGivenLoginAndPassword = mongoRealm.getMongoCollection().findOne(query);
-        final boolean userFound = userWithGivenLoginAndPassword != null;
-        return userFound;
+        try {
+            final String loginProperty = mongoRealm.getProperty(MongoRealm.LOGIN_PROPERTY);
+            final String passwordProperty = mongoRealm.getProperty(MongoRealm.PASSWORD_PROPERTY);
+            final String hashFunction = mongoRealm.getProperty(MongoRealm.HASH_FUNCTION);
+
+            final MessageDigest digester = MessageDigest.getInstance(hashFunction);
+            byte[] passwordAsBytesArray = Charset.forName("UTF-8").encode(CharBuffer.wrap(password)).array();
+            final byte[] digest = digester.digest(passwordAsBytesArray);
+            String digestHex = digestToHex(digest);
+            final DBObject query = QueryBuilder.start(loginProperty).is(login).and(passwordProperty).is(digestHex).get();
+            DBObject userWithGivenLoginAndPassword = mongoRealm.getMongoCollection().findOne(query);
+            final boolean userFound = userWithGivenLoginAndPassword != null;
+            return userFound;
+        } catch (NoSuchAlgorithmException ex) {
+            throw new RuntimeException(ex);
+        }
+    }
+
+    private String digestToHex(byte[] digest) {
+        StringBuilder sb = new StringBuilder();
+        for (byte b : digest) {
+            String hex = Integer.toHexString(0xFF & b);
+            if (hex.length() == 1) {
+                // could use a for loop, but we're only dealing with a single byte
+                sb.append('0');
+            }
+            sb.append(hex);
+        }
+        return sb.toString();
     }
 
 }
