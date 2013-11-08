@@ -68,7 +68,10 @@ public class MongoRealm extends AppservRealm {
         } catch (UnknownHostException ex) {
             throw new RuntimeException(ex);
         }
-
+    }
+    
+    public DBCollection getMongoCollection(){
+        return collection;
     }
 
     @Override

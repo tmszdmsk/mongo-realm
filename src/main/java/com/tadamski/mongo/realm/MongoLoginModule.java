@@ -1,13 +1,10 @@
 package com.tadamski.mongo.realm;
 
-import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
-import com.mongodb.MongoClient;
 import com.mongodb.QueryBuilder;
 import com.sun.appserv.security.AppservPasswordLoginModule;
 import com.sun.enterprise.security.auth.realm.InvalidOperationException;
 import com.sun.enterprise.security.auth.realm.NoSuchUserException;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
@@ -15,39 +12,26 @@ import javax.security.auth.login.LoginException;
 
 public class MongoLoginModule extends AppservPasswordLoginModule {
 
-    private DBCollection collection;
-
-    public MongoLoginModule() throws UnknownHostException {
-        collection = new MongoClient().getDB("users").getCollection("users");
-    }
-
     @Override
     protected void authenticateUser() throws LoginException {
         if (!(_currentRealm instanceof MongoRealm)) {
-            throw new LoginException("Realm not MyRealm. Check 'login.conf'.");
+            throw new LoginException("Not supported realm, check login.conf");
         }
         MongoRealm mongoRealm = (MongoRealm) _currentRealm;
 
-        // Authenticate User
-        if (!doAuthentication(_username, _passwd)) {
-            //Login failed
-            throw new LoginException("MyRealm LoginModule: Login Failed for user " + _username);
+        if (!checkCredentials(mongoRealm, _username, _passwd)) {
+            throw new LoginException(String.format("Authenthication failed for user %s", _username));
         }
-
-        // Login succeeded
-        System.out.println("MyRealm LoginModule: Login Succeded for user " + _username);
-
         // Get group names for the authenticated user from the Realm class
         Enumeration enumeration = null;
         try {
             enumeration = mongoRealm.getGroupNames(_username);
         } catch (InvalidOperationException e) {
-            throw new LoginException("InvalidOperationException was thrown for getGroupNames() on MyRealm");
+            throw new LoginException("InvalidOperationException was thrown for getGroupNames() on MongoRealm");
         } catch (NoSuchUserException e) {
-            throw new LoginException("NoSuchUserException was thrown for getGroupNames() on MyRealm");
+            throw new LoginException("NoSuchUserException was thrown for getGroupNames() on MongoRealm");
         }
 
-        // Convert the Enumeration to String[]
         List<String> g = new ArrayList<>();
         while (enumeration != null && enumeration.hasMoreElements()) {
             g.add((String) enumeration.nextElement());
@@ -65,9 +49,13 @@ public class MongoLoginModule extends AppservPasswordLoginModule {
     /**
      * Performs the authentication.
      */
-    private boolean doAuthentication(String user, char[] password) {
-        DBObject findOne = collection.findOne(QueryBuilder.start("username").is(user).and("password").is(password).get());
-        return findOne != null;
+    private boolean checkCredentials(MongoRealm mongoRealm, String login, char[] password) {
+        final String loginProperty = mongoRealm.getProperty(MongoRealm.LOGIN_PROPERTY);
+        final String passwordProperty = mongoRealm.getProperty(MongoRealm.PASSWORD_PROPERTY);
+        final DBObject query = QueryBuilder.start(loginProperty).is(login).and(passwordProperty).is(password).get();
+        DBObject userWithGivenLoginAndPassword = mongoRealm.getMongoCollection().findOne(query);
+        final boolean userFound = userWithGivenLoginAndPassword != null;
+        return userFound;
     }
 
 }
