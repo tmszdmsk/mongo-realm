@@ -1,14 +1,16 @@
 package com.tadamski.mongo.realm;
 
+import com.mongodb.BasicDBList;
 import com.mongodb.DBCollection;
+import com.mongodb.DBObject;
 import com.mongodb.MongoClient;
+import com.mongodb.QueryBuilder;
 import com.sun.appserv.security.AppservRealm;
 import com.sun.enterprise.security.auth.realm.BadRealmException;
 import com.sun.enterprise.security.auth.realm.InvalidOperationException;
 import com.sun.enterprise.security.auth.realm.NoSuchRealmException;
 import com.sun.enterprise.security.auth.realm.NoSuchUserException;
 import java.net.UnknownHostException;
-import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.Properties;
 import java.util.Vector;
@@ -26,11 +28,10 @@ public class MongoAppservRealm extends AppservRealm {
     @Override
     protected void init(Properties properties) throws BadRealmException, NoSuchRealmException {
         try {
-            collection = new MongoClient().getDB("dbName").getCollection("dbCollection");
+            collection = new MongoClient().getDB("users").getCollection("users");
 
             System.out.println("Init MyRealm");
 
-            // Pass the properties declared in the console to the system
             String propJaasContext = properties.getProperty(JAAS_CONTEXT);
             if (propJaasContext != null) {
                 setProperty(JAAS_CONTEXT, propJaasContext);
@@ -43,7 +44,9 @@ public class MongoAppservRealm extends AppservRealm {
 
     @Override
     public Enumeration getGroupNames(String user) throws InvalidOperationException, NoSuchUserException {
-        return new Vector<String>(Arrays.asList("USER_GROUP")).elements();
+        DBObject userObject = collection.findOne(QueryBuilder.start("username").is(user).get());
+        BasicDBList groupsList = (BasicDBList) userObject.get("groups");
+        return new Vector<>(groupsList).elements();
     }
 
     @Override

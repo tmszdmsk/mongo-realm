@@ -1,9 +1,13 @@
 package com.tadamski.mongo.realm;
 
+import com.mongodb.DBCollection;
+import com.mongodb.DBObject;
 import com.mongodb.MongoClient;
+import com.mongodb.QueryBuilder;
 import com.sun.appserv.security.AppservPasswordLoginModule;
 import com.sun.enterprise.security.auth.realm.InvalidOperationException;
 import com.sun.enterprise.security.auth.realm.NoSuchUserException;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
@@ -11,10 +15,15 @@ import javax.security.auth.login.LoginException;
 
 public class MongoAppservLoginModule extends AppservPasswordLoginModule {
 
-    private MongoClient mc;
+    private DBCollection collection;
+
+    public MongoAppservLoginModule() throws UnknownHostException {
+        collection = new MongoClient().getDB("users").getCollection("users");
+    }
 
     @Override
     protected void authenticateUser() throws LoginException {
+        String _password = new String(_passwd);
         System.out.println("MyRealm LoginModule authenticateUser(), _username:"
                 + _username + ", _password:" + _password + ", _currentrealm:" + _currentRealm);
 
@@ -61,8 +70,8 @@ public class MongoAppservLoginModule extends AppservPasswordLoginModule {
      * Performs the authentication.
      */
     private boolean doAuthentication(String user, String password) {
-        // Implement this.
-        return false; // or true :)
+        DBObject findOne = collection.findOne(QueryBuilder.start("username").is(user).and("password").is(password).get());
+        return findOne != null;
     }
 
 }
