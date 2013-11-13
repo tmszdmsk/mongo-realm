@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.tadamski.mongo.realm;
+package com.tadamski.glassfish.mongo.realm;
 
 import java.nio.CharBuffer;
 import java.nio.charset.Charset;

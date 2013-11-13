@@ -1,4 +1,4 @@
-package com.tadamski.mongo.realm;
+package com.tadamski.glassfish.mongo.realm;
 
 import com.mongodb.BasicDBList;
 import com.mongodb.DBCollection;
