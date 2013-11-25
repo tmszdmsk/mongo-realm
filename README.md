@@ -20,3 +20,26 @@ Setup
  asadmin create-auth-realm --classname com.tadamski.glassfish.mongo.realm.MongoRealm --property jaas-context=mongoRealm $REALM_NAME
  ```
  4. configure your applicaton to use newly created realm (in most cases few lines in `web.xml` will be enough)
+
+Configuration
+-------------
+__By default__:
+
+Mongo-Realm connects to `localhost` on `27017` and looks for data in `users` database in `users` collection. Informations about users are stored in separate documents [one user = one document]. Each document contains `login`, `password` simple string properties and `groups` with array of group names user belongs to. All passwords are hashed using `SHA-512` function.
+
+__Custom configuration__:
+
+Of course defaults can be overriden. Simply add properties to realm created in 3rd step of __Setup__.
+
+| Property name         | Default value |
+|-----------------------|---------------|
+| mongo.hostname        | localhost     |
+| mongo.port            | 27017         |
+| mongo.db.name         | users         |
+| mongo.collection.name | users         |
+| login.property        | login         |
+| password.property     | password      |
+| groups.property       | groups        |
+| hash.function         | SHA-512       |
+
+
