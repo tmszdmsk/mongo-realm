@@ -31,15 +31,15 @@ __Custom configuration__:
 
 Of course defaults can be overriden. Simply add properties to realm created in 3rd step of __Setup__.
 
-| Property name         | Default value |
-|-----------------------|---------------|
-| mongo.hostname        | localhost     |
-| mongo.port            | 27017         |
-| mongo.db.name         | users         |
-| mongo.collection.name | users         |
-| login.property        | login         |
-| password.property     | password      |
-| groups.property       | groups        |
-| hash.function         | SHA-512       |
+| Property name             | Default value |
+|---------------------------|---------------|
+| __mongo.hostname__        | localhost     |
+| __mongo.port__            | 27017         |
+| __mongo.db.name__         | users         |
+| __mongo.collection.name__ | users         |
+| __login.property__        | login         |
+| __password.property__     | password      |
+| __groups.property__       | groups        |
+| __hash.function__         | SHA-512       |
 
 
