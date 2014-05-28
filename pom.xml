@@ -8,7 +8,7 @@
     </parent>
     <groupId>com.tadamski.glassfish</groupId>
     <artifactId>mongo-realm</artifactId>
-    <version>0.1-SNAPSHOT</version>
+    <version>0.1.1-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>${project.artifactId}</name>
     <description>MongoDB-backed Realm for Glassfish</description>
@@ -55,7 +55,7 @@
         <dependency>
             <groupId>org.mongodb</groupId>
             <artifactId>mongo-java-driver</artifactId>
-            <version>2.11.3</version>
+            <version>2.12.2</version>
         </dependency>
     </dependencies>
     <build>
