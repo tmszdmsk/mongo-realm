@@ -57,28 +57,45 @@ public class MongoLoginModule extends AppservPasswordLoginModule {
             final String hashFunction = mongoRealm.getProperty(MongoRealm.HASH_FUNCTION);
 
             final String saltProperty = mongoRealm.getProperty(MongoRealm.SALT_PROPERTY);
-            final DBObject findSaltQuery = QueryBuilder.start(loginProperty).is(login).get();
-            String salt = (String) mongoRealm.getMongoCollection().findOne(findSaltQuery).get(saltProperty);
-            
-            //for backward compatibility
-            if (salt == null) {
-                SecureRandom random = new SecureRandom();
-                salt = new BigInteger(130, random).toString(32);
-                BasicDBObject updateSaltQuery = new BasicDBObject();
-                updateSaltQuery.append("$set", new BasicDBObject().append(saltProperty, salt));
-                mongoRealm.getMongoCollection().update(findSaltQuery, updateSaltQuery);
-            }
 
-            char[] passwordWithSalt = new char[password.length + salt.length()];
-            System.arraycopy(password, 0, passwordWithSalt, 0, password.length);
-            System.arraycopy(salt.toCharArray(), 0, passwordWithSalt, password.length, salt.length());
-            String hashedPassword = PasswordHasher.hash(password, hashFunction);
-            final DBObject query = QueryBuilder.start(loginProperty).is(login).and(passwordProperty).is(hashedPassword).get();
-            DBObject userWithGivenLoginAndPassword = mongoRealm.getMongoCollection().findOne(query);
-            final boolean userFound = userWithGivenLoginAndPassword != null;
-            return userFound;
+            final DBObject findUserQuery = QueryBuilder.start(loginProperty).is(login).get();
+            DBObject user = mongoRealm.getMongoCollection().findOne(findUserQuery);
+            boolean userAuthenticated = false;
+            String salt;
+            if (user != null) {
+
+                //for backward compatubility
+                boolean salted = user.containsField(saltProperty);
+                salt = salted ? (String) user.get(saltProperty) : "";
+
+                char[] passwordWithSalt = concatenatePasswordWithSalt(password, salt.toCharArray());
+                String hashedPassword = PasswordHasher.hash(passwordWithSalt, hashFunction);
+                userAuthenticated = hashedPassword.equals(user.get(passwordProperty));
+
+                //update passwords that haven't been salted
+                if (!salted & userAuthenticated) {
+                    SecureRandom random = new SecureRandom();
+                    salt = new BigInteger(130, random).toString(32);
+                    passwordWithSalt = concatenatePasswordWithSalt(password, salt.toCharArray());
+                    hashedPassword = PasswordHasher.hash(passwordWithSalt, hashFunction);
+                    BasicDBObject updateSaltAndPasswordQuery = new BasicDBObject()
+                            .append("$set", new BasicDBObject()
+                                    .append(saltProperty, salt)
+                                    .append(passwordProperty, hashedPassword)
+                            );
+                    mongoRealm.getMongoCollection().update(findUserQuery, updateSaltAndPasswordQuery);
+                }
+            }
+            return userAuthenticated;
         } catch (NoSuchAlgorithmException ex) {
             throw new RuntimeException(ex);
         }
+    }
+
+    private char[] concatenatePasswordWithSalt(char[] password, char[] salt) {
+        char[] passwordWithSalt = new char[password.length + salt.length];
+        System.arraycopy(password, 0, passwordWithSalt, 0, password.length);
+        System.arraycopy(salt, 0, passwordWithSalt, password.length, salt.length);
+        return passwordWithSalt;
     }
 }
