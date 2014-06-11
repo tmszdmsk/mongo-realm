@@ -11,7 +11,6 @@ import com.sun.enterprise.security.auth.realm.InvalidOperationException;
 import com.sun.enterprise.security.auth.realm.NoSuchRealmException;
 import com.sun.enterprise.security.auth.realm.NoSuchUserException;
 import java.net.UnknownHostException;
-import java.security.SecureRandom;
 import java.util.Enumeration;
 import java.util.Properties;
 import java.util.Vector;
