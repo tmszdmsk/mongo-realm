@@ -4,7 +4,6 @@ import com.mongodb.BasicDBList;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 import com.mongodb.MongoClient;
-import com.mongodb.MongoCredential;
 import com.mongodb.QueryBuilder;
 import com.sun.appserv.security.AppservRealm;
 import com.sun.enterprise.security.auth.realm.BadRealmException;
