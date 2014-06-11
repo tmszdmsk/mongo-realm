@@ -1,11 +1,14 @@
 package com.tadamski.glassfish.mongo.realm;
 
+import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 import com.mongodb.QueryBuilder;
 import com.sun.appserv.security.AppservPasswordLoginModule;
 import com.sun.enterprise.security.auth.realm.InvalidOperationException;
 import com.sun.enterprise.security.auth.realm.NoSuchUserException;
+import java.math.BigInteger;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
@@ -53,6 +56,22 @@ public class MongoLoginModule extends AppservPasswordLoginModule {
             final String passwordProperty = mongoRealm.getProperty(MongoRealm.PASSWORD_PROPERTY);
             final String hashFunction = mongoRealm.getProperty(MongoRealm.HASH_FUNCTION);
 
+            final String saltProperty = mongoRealm.getProperty(MongoRealm.SALT_PROPERTY);
+            final DBObject findSaltQuery = QueryBuilder.start(loginProperty).is(login).get();
+            String salt = (String) mongoRealm.getMongoCollection().findOne(findSaltQuery).get(saltProperty);
+            
+            //for backward compatibility
+            if (salt == null) {
+                SecureRandom random = new SecureRandom();
+                salt = new BigInteger(130, random).toString(32);
+                BasicDBObject updateSaltQuery = new BasicDBObject();
+                updateSaltQuery.append("$set", new BasicDBObject().append(saltProperty, salt));
+                mongoRealm.getMongoCollection().update(findSaltQuery, updateSaltQuery);
+            }
+
+            char[] passwordWithSalt = new char[password.length + salt.length()];
+            System.arraycopy(password, 0, passwordWithSalt, 0, password.length);
+            System.arraycopy(salt.toCharArray(), 0, passwordWithSalt, password.length, salt.length());
             String hashedPassword = PasswordHasher.hash(password, hashFunction);
             final DBObject query = QueryBuilder.start(loginProperty).is(login).and(passwordProperty).is(hashedPassword).get();
             DBObject userWithGivenLoginAndPassword = mongoRealm.getMongoCollection().findOne(query);
