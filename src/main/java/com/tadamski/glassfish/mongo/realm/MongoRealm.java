@@ -4,7 +4,6 @@ import com.mongodb.BasicDBList;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 import com.mongodb.MongoClient;
-import com.mongodb.MongoCredential;
 import com.mongodb.QueryBuilder;
 import com.sun.appserv.security.AppservRealm;
 import com.sun.enterprise.security.auth.realm.BadRealmException;
@@ -28,6 +27,7 @@ public class MongoRealm extends AppservRealm {
     public static final String MONGO_DB_NAME = "mongo.db.name";
     public static final String MONGO_COLLECTION_NAME = "mongo.collection.name";
     public static final String LOGIN_PROPERTY = "login.property";
+    public static final String SALT_PROPERTY = "salt.property";
     public static final String PASSWORD_PROPERTY = "password.property";
     public static final String GROUPS_PROPERTY = "groups.property";
     public static final String HASH_FUNCTION = "hash.function";
@@ -40,6 +40,7 @@ public class MongoRealm extends AppservRealm {
     private String dbName;
     private String collectionName;
     private String loginProperty;
+    private String saltProperty;
     private String passwordProperty;
     private String groupsProperty;
     private String hashFunction;
@@ -51,16 +52,18 @@ public class MongoRealm extends AppservRealm {
         dbName = properties.getProperty(MONGO_DB_NAME, "users");
         collectionName = properties.getProperty(MONGO_COLLECTION_NAME, "users");
         loginProperty = properties.getProperty(LOGIN_PROPERTY, "login");
+        saltProperty = properties.getProperty(SALT_PROPERTY, "salt");
         passwordProperty = properties.getProperty(PASSWORD_PROPERTY, "password");
         groupsProperty = properties.getProperty(GROUPS_PROPERTY, "groups");
         //SUPPORTED: MD2, MD5, SHA-1, SHA-256, SHA-384, and SHA-512
         hashFunction = properties.getProperty(GROUPS_PROPERTY, "SHA-512");
-
+        
         setProperty(MONGO_HOSTNAME, hostname);
         setProperty(MONGO_PORT, port.toString());
         setProperty(MONGO_DB_NAME, dbName);
         setProperty(MONGO_COLLECTION_NAME, collectionName);
         setProperty(LOGIN_PROPERTY, loginProperty);
+        setProperty(SALT_PROPERTY, saltProperty);
         setProperty(PASSWORD_PROPERTY, passwordProperty);
         setProperty(GROUPS_PROPERTY, groupsProperty);
         setProperty(HASH_FUNCTION, hashFunction);

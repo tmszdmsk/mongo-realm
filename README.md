@@ -38,6 +38,7 @@ Of course defaults can be overriden. Simply add properties to realm created in 3
 | __mongo.db.name__         | users         |
 | __mongo.collection.name__ | users         |
 | __login.property__        | login         |
+| __salt.property__         | salt          |
 | __password.property__     | password      |
 | __groups.property__       | groups        |
 | __hash.function__         | SHA-512       |
