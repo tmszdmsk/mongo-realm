@@ -11,12 +11,16 @@ import java.security.NoSuchAlgorithmException;
  */
 public class PasswordHasher {
 
-    public static String hash(char[] password, String alghorithm) throws NoSuchAlgorithmException {
-        final MessageDigest digester = MessageDigest.getInstance(alghorithm);
-        byte[] passwordAsBytesArray = Charset.forName("UTF-8").encode(CharBuffer.wrap(password)).array();
-        final byte[] digest = digester.digest(passwordAsBytesArray);
-        String digestHex = digestToHex(digest);
-        return digestHex;
+    public static String hash(char[] password, String alghorithm) {
+        try {
+            final MessageDigest digester = MessageDigest.getInstance(alghorithm);
+            byte[] passwordAsBytesArray = Charset.forName("UTF-8").encode(CharBuffer.wrap(password)).array();
+            final byte[] digest = digester.digest(passwordAsBytesArray);
+            String digestHex = digestToHex(digest);
+            return digestHex;
+        } catch (NoSuchAlgorithmException ex) {
+            throw new RuntimeException(ex);
+        }
     }
 
     private static String digestToHex(byte[] digest) {
