@@ -7,6 +7,7 @@ import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 import com.mongodb.MongoClient;
 import com.mongodb.QueryBuilder;
+import com.mongodb.WriteConcern;
 import com.mongodb.WriteResult;
 import com.sun.appserv.security.AppservRealm;
 import com.sun.enterprise.security.auth.realm.BadRealmException;
@@ -53,18 +54,9 @@ public class MongoRealm extends AppservRealm implements MongoRealmInternalApi {
         groupsProperty = property(GROUPS_PROPERTY, "groups");
         //SUPPORTED: MD2, MD5, SHA-1, SHA-256, SHA-384, and SHA-512
         hashFunction = property(GROUPS_PROPERTY, "SHA-512");
-
-        setProperty(MONGO_HOSTNAME, hostname);
-        setProperty(MONGO_PORT, port.toString());
-        setProperty(MONGO_DB_NAME, dbName);
-        setProperty(MONGO_COLLECTION_NAME, collectionName);
-        setProperty(LOGIN_PROPERTY, loginProperty);
-        setProperty(SALT_PROPERTY, saltProperty);
-        setProperty(PASSWORD_PROPERTY, passwordProperty);
-        setProperty(GROUPS_PROPERTY, groupsProperty);
-        setProperty(HASH_FUNCTION, hashFunction);
         try {
             collection = new MongoClient(hostname, port).getDB(dbName).getCollection(collectionName);
+            collection.setWriteConcern(WriteConcern.ACKNOWLEDGED);
             String propJaasContext = properties.getProperty(JAAS_CONTEXT);
             if (propJaasContext != null) {
                 setProperty(JAAS_CONTEXT, propJaasContext);
@@ -104,20 +96,20 @@ public class MongoRealm extends AppservRealm implements MongoRealmInternalApi {
     }
 
     public ObjectId createUser(String login, char[] password) {
-        char[] randomSalt = generateRandomSalt().toCharArray();
+        String randomSalt = generateRandomSalt();
         DBObject newUser = BasicDBObjectBuilder.start()
                 .append(loginProperty, login)
-                .append(passwordProperty, PasswordHasher.hash(concatenatePasswordWithSalt(password, randomSalt), hashFunction))
+                .append(passwordProperty, PasswordHasher.hash(concatenatePasswordWithSalt(password, randomSalt.toCharArray()), hashFunction))
                 .append(saltProperty, randomSalt)
+                .append(groupsProperty, new Vector<String>())
                 .get();
         collection.insert(newUser);
         return (ObjectId) newUser.get("_id");
     }
 
-    public void changeLogin(ObjectId userId, String currentLogin, String newLogin) {
+    public void changeLogin(ObjectId userId, String newLogin) {
         DBObject query = BasicDBObjectBuilder.start()
                 .append("_id", userId)
-                .append(getProperty(LOGIN_PROPERTY), currentLogin)
                 .get();
         DBObject update = BasicDBObjectBuilder.start()
                 .push("$set").append(getProperty(LOGIN_PROPERTY), newLogin).pop()
@@ -125,28 +117,22 @@ public class MongoRealm extends AppservRealm implements MongoRealmInternalApi {
         WriteResult result = getMongoCollection().update(query, update, false, false);
         if (result.getN() == 0) {
             throw new RuntimeException(
-                    String.format("Cannot change user login from %s to %s for user with id %s, didn't find in db", currentLogin, newLogin, userId)
+                    String.format("Cannot change user login to %s for user with id %s, didn't find in db", newLogin, userId)
             );
         }
     }
 
-    public void changePassword(ObjectId userId, char[] currentPassword, char[] newPassword) {
-        DBObject user = collection.findOne(userId);
-        String oldSalt;
-        if (user.containsField(saltProperty)) {
-            oldSalt = (String) user.get(saltProperty);
-        } else {
-            oldSalt = "";
-        }
+    public void changePassword(ObjectId userId, char[] newPassword) {
         SecureRandom random = new SecureRandom();
         String salt = new BigInteger(130, random).toString(32);
         DBObject query = BasicDBObjectBuilder.start()
                 .append("_id", userId)
-                .append(getProperty(PASSWORD_PROPERTY), PasswordHasher.hash(concatenatePasswordWithSalt(currentPassword, oldSalt.toCharArray()), hashFunction))
                 .get();
         DBObject update = BasicDBObjectBuilder.start()
+                .push("$set")
                 .append(passwordProperty, PasswordHasher.hash(concatenatePasswordWithSalt(newPassword, salt.toCharArray()), hashFunction))
                 .append(saltProperty, salt)
+                .pop()
                 .get();
         WriteResult updateResult = collection.update(query, update, false, false);
         if (updateResult.getN() == 0) {

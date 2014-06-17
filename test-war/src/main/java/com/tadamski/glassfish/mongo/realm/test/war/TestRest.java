@@ -46,10 +46,10 @@ public class TestRest {
         mongoRealmApi.deleteUser((ObjectId) userByLogin.get("_id"));
         
         ObjectId userId = mongoRealmApi.createUser("testUser", "testPassword".toCharArray());
-        mongoRealmApi.changeLogin((ObjectId) userByLogin.get("_id"), "testUser", "testUser2");
-        mongoRealmApi.changeLogin(userId, "testUser", "testUser2");
+        mongoRealmApi.changeLogin((ObjectId) userByLogin.get("_id"), "testUser2");
+        mongoRealmApi.changeLogin(userId, "testUser2");
         mongoRealmApi.validateCredentials("testUser2", "testPassword".toCharArray());
-        mongoRealmApi.changePassword(userId, "testPassword".toCharArray(), "testPassword2".toCharArray());
+        mongoRealmApi.changePassword(userId, "testPassword2".toCharArray());
         mongoRealmApi.validateCredentials("testUser2", "testPassword2".toCharArray());
         return mongoRealmApi.getUserByLogin("testUser2").toString();
         

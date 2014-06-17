@@ -36,7 +36,7 @@ public interface MongoRealmInternalApi {
 
     ObjectId createUser(String login, char[] password);
 
-    void changeLogin(ObjectId userId, String currentLogin, String newLogin);
-    
-    void changePassword(ObjectId userId, char[] currentPassword, char[] newPassword);
+    void changeLogin(ObjectId userId, String newLogin);
+
+    void changePassword(ObjectId userId, char[] newPassword);
 }

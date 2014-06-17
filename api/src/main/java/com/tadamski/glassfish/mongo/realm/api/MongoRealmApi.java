@@ -52,12 +52,12 @@ public class MongoRealmApi {
         return mongoRealm.createUser(login, password);
     }
 
-    public void changeLogin(ObjectId userId, String currentLogin, String newLogin) {
-        mongoRealm.changeLogin(userId, currentLogin, newLogin);
+    public void changeLogin(ObjectId userId, String newLogin) {
+        mongoRealm.changeLogin(userId, newLogin);
     }
 
-    public void changePassword(ObjectId userId, char[] currentPassword, char[] newPassword) {
-        mongoRealm.changePassword(userId, currentPassword, newPassword);
+    public void changePassword(ObjectId userId, char[] newPassword) {
+        mongoRealm.changePassword(userId, newPassword);
     }
 
     public DBCursor getUsers() {
