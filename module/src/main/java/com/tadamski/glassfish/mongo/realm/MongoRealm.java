@@ -114,7 +114,7 @@ public class MongoRealm extends AppservRealm implements MongoRealmInternalApi {
                 .append("_id", userId)
                 .get();
         DBObject update = BasicDBObjectBuilder.start()
-                .push("$set").append(getProperty(LOGIN_PROPERTY), newLogin).pop()
+                .push("$set").append(loginProperty, newLogin).pop()
                 .get();
         WriteResult result = getMongoCollection().update(query, update, false, false);
         if (result.getN() == 0) {

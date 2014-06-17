@@ -37,8 +37,8 @@
         <connection>scm:git:https://github.com/tmszdmsk/mongo-realm.git</connection>
         <developerConnection>scm:git:https://github.com/tmszdmsk/mongo-realm.git</developerConnection>
         <url>https://github.com/tmszdmsk/mongo-realm</url>
-      <tag>HEAD</tag>
-  </scm>
+        <tag>HEAD</tag>
+    </scm>
     <properties>
         <maven.compiler.source>1.6</maven.compiler.source>
         <maven.compiler.target>1.6</maven.compiler.target>
