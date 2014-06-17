@@ -8,7 +8,7 @@
     </parent>
     <groupId>com.tadamski.glassfish</groupId>
     <artifactId>mongo-realm</artifactId>
-    <version>1.0.0-beta-1</version>
+    <version>1.0.0-beta-2-SNAPSHOT</version>
     <packaging>pom</packaging>
     <modules>
         <module>api</module>
@@ -37,7 +37,7 @@
         <connection>scm:git:https://github.com/tmszdmsk/mongo-realm.git</connection>
         <developerConnection>scm:git:https://github.com/tmszdmsk/mongo-realm.git</developerConnection>
         <url>https://github.com/tmszdmsk/mongo-realm</url>
-      <tag>v1.0.0-beta-1</tag>
+      <tag>HEAD</tag>
   </scm>
     <properties>
         <maven.compiler.source>1.6</maven.compiler.source>
