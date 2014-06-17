@@ -79,7 +79,7 @@ public class MongoRealm extends AppservRealm implements MongoRealmInternalApi {
             throw new NoSuchUserException(String.format("User with login property(%s)==%s not found", loginProperty, login));
         }
         BasicDBList groupsList = (BasicDBList) userObject.get(groupsProperty);
-        return new Vector<>(groupsList).elements();
+        return new Vector(groupsList).elements();
     }
 
     @Override
@@ -95,6 +95,7 @@ public class MongoRealm extends AppservRealm implements MongoRealmInternalApi {
         return property;
     }
 
+    @Override
     public ObjectId createUser(String login, char[] password) {
         String randomSalt = generateRandomSalt();
         DBObject newUser = BasicDBObjectBuilder.start()
@@ -107,6 +108,7 @@ public class MongoRealm extends AppservRealm implements MongoRealmInternalApi {
         return (ObjectId) newUser.get("_id");
     }
 
+    @Override
     public void changeLogin(ObjectId userId, String newLogin) {
         DBObject query = BasicDBObjectBuilder.start()
                 .append("_id", userId)
@@ -122,6 +124,7 @@ public class MongoRealm extends AppservRealm implements MongoRealmInternalApi {
         }
     }
 
+    @Override
     public void changePassword(ObjectId userId, char[] newPassword) {
         SecureRandom random = new SecureRandom();
         String salt = new BigInteger(130, random).toString(32);

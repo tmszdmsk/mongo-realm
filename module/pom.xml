@@ -4,7 +4,7 @@
     <parent>
         <groupId>com.tadamski.glassfish</groupId>
         <artifactId>mongo-realm</artifactId>
-        <version>0.1.2-SNAPSHOT</version>
+        <version>1.0.0-SNAPSHOT</version>
     </parent>
     <groupId>com.tadamski.glassfish</groupId>
     <artifactId>mongo-realm-module</artifactId>
@@ -16,5 +16,21 @@
             <artifactId>mongo-realm-api</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.glassfish.security</groupId>
+            <artifactId>security</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.mongodb</groupId>
+            <artifactId>mongo-java-driver</artifactId>
+        </dependency>
     </dependencies>
+    <build>
+        <plugins>
+            <plugin>                    
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
 </project>

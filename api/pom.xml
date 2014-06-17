@@ -4,10 +4,21 @@
     <parent>
         <groupId>com.tadamski.glassfish</groupId>
         <artifactId>mongo-realm</artifactId>
-        <version>0.1.2-SNAPSHOT</version>
+        <version>1.0.0-SNAPSHOT</version>
     </parent>
     <groupId>com.tadamski.glassfish</groupId>
     <artifactId>mongo-realm-api</artifactId>
     <packaging>jar</packaging>
     <name>${project.artifactId}</name>
+    <dependencies>
+        <dependency>
+            <groupId>org.glassfish.security</groupId>
+            <artifactId>security</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.mongodb</groupId>
+            <artifactId>mongo-java-driver</artifactId>
+        </dependency>
+    </dependencies>
+
 </project>

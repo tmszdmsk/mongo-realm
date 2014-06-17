@@ -30,7 +30,7 @@ public class MongoLoginModule extends AppservPasswordLoginModule {
             throw new LoginException("NoSuchUserException was thrown for getGroupNames() on MongoRealm");
         }
 
-        List<String> g = new ArrayList<>();
+        List<String> g = new ArrayList<String>();
         while (enumeration != null && enumeration.hasMoreElements()) {
             g.add((String) enumeration.nextElement());
         }
