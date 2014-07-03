@@ -44,16 +44,16 @@ public class MongoRealm extends AppservRealm implements MongoRealmInternalApi {
 
     @Override
     protected void init(Properties properties) throws BadRealmException, NoSuchRealmException {
-        hostname = properties.getProperty(MONGO_HOSTNAME, "localhost");
-        port = Integer.valueOf(properties.getProperty(MONGO_PORT, "27017"));
-        dbName = properties.getProperty(MONGO_DB_NAME, "users");
-        collectionName = properties.getProperty(MONGO_COLLECTION_NAME, "users");
-        loginProperty = properties.getProperty(LOGIN_PROPERTY, "login");
-        saltProperty = properties.getProperty(SALT_PROPERTY, "salt");
-        passwordProperty = properties.getProperty(PASSWORD_PROPERTY, "password");
-        groupsProperty = properties.getProperty(GROUPS_PROPERTY, "groups");
+        hostname = property(MONGO_HOSTNAME, properties.getProperty(MONGO_HOSTNAME, "localhost"));
+        port = Integer.valueOf(property(MONGO_HOSTNAME, properties.getProperty(MONGO_PORT, "27017")));
+        dbName = property(MONGO_HOSTNAME, properties.getProperty(MONGO_DB_NAME, "users"));
+        collectionName = property(MONGO_HOSTNAME, properties.getProperty(MONGO_COLLECTION_NAME, "users"));
+        loginProperty = property(MONGO_HOSTNAME, properties.getProperty(LOGIN_PROPERTY, "login"));
+        saltProperty = property(MONGO_HOSTNAME, properties.getProperty(SALT_PROPERTY, "salt"));
+        passwordProperty = property(MONGO_HOSTNAME, properties.getProperty(PASSWORD_PROPERTY, "password"));
+        groupsProperty = property(MONGO_HOSTNAME, properties.getProperty(GROUPS_PROPERTY, "groups"));
         //SUPPORTED: MD2, MD5, SHA-1, SHA-256, SHA-384, and SHA-512
-        hashFunction = properties.getProperty(HASH_FUNCTION, "SHA-512");
+        hashFunction = property(MONGO_HOSTNAME, properties.getProperty(HASH_FUNCTION, "SHA-512"));
         try {
             collection = new MongoClient(hostname, port).getDB(dbName).getCollection(collectionName);
             collection.setWriteConcern(WriteConcern.ACKNOWLEDGED);
@@ -85,6 +85,14 @@ public class MongoRealm extends AppservRealm implements MongoRealmInternalApi {
     @Override
     public String getAuthType() {
         return AUTH_TYPE;
+    }
+
+    private String property(String name, String defaultValue) {
+        String property = getProperties().getProperty(name, defaultValue);
+        if (defaultValue.equals(property)) {
+            getProperties().setProperty(name, property);
+        }
+        return property;
     }
 
     @Override
