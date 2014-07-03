@@ -44,16 +44,16 @@ public class MongoRealm extends AppservRealm implements MongoRealmInternalApi {
 
     @Override
     protected void init(Properties properties) throws BadRealmException, NoSuchRealmException {
-        hostname = property(MONGO_HOSTNAME, "localhost");
-        port = Integer.valueOf(property(MONGO_PORT, "27017"));
-        dbName = property(MONGO_DB_NAME, "users");
-        collectionName = property(MONGO_COLLECTION_NAME, "users");
-        loginProperty = property(LOGIN_PROPERTY, "login");
-        saltProperty = property(SALT_PROPERTY, "salt");
-        passwordProperty = property(PASSWORD_PROPERTY, "password");
-        groupsProperty = property(GROUPS_PROPERTY, "groups");
+        hostname = property(MONGO_HOSTNAME, properties.getProperty(MONGO_HOSTNAME, "localhost"));
+        port = Integer.valueOf(property(MONGO_PORT, properties.getProperty(MONGO_PORT, "27017")));
+        dbName = property(MONGO_DB_NAME, properties.getProperty(MONGO_DB_NAME, "users"));
+        collectionName = property(MONGO_COLLECTION_NAME, properties.getProperty(MONGO_COLLECTION_NAME, "users"));
+        loginProperty = property(LOGIN_PROPERTY, properties.getProperty(LOGIN_PROPERTY, "login"));
+        saltProperty = property(SALT_PROPERTY, properties.getProperty(SALT_PROPERTY, "salt"));
+        passwordProperty = property(PASSWORD_PROPERTY, properties.getProperty(PASSWORD_PROPERTY, "password"));
+        groupsProperty = property(GROUPS_PROPERTY, properties.getProperty(GROUPS_PROPERTY, "groups"));
         //SUPPORTED: MD2, MD5, SHA-1, SHA-256, SHA-384, and SHA-512
-        hashFunction = property(GROUPS_PROPERTY, "SHA-512");
+        hashFunction = property(HASH_FUNCTION, properties.getProperty(HASH_FUNCTION, "SHA-512"));
         try {
             collection = new MongoClient(hostname, port).getDB(dbName).getCollection(collectionName);
             collection.setWriteConcern(WriteConcern.ACKNOWLEDGED);
@@ -90,7 +90,7 @@ public class MongoRealm extends AppservRealm implements MongoRealmInternalApi {
     private String property(String name, String defaultValue) {
         String property = getProperties().getProperty(name, defaultValue);
         if (defaultValue.equals(property)) {
-            getProperties().setProperty(MONGO_HOSTNAME, property);
+            getProperties().setProperty(name, property);
         }
         return property;
     }
