@@ -27,7 +27,7 @@ __By default__:
 
 Mongo-Realm connects to `localhost` on `27017` and looks for data in `users` database in `users` collection. Informations about users are stored in separate documents [one user = one document]. Each document contains `login`, `password` simple string properties and `groups` with array of group names user belongs to. All passwords are hashed using `SHA-512` function.
 
-Salt property is appended to the password before hashing. For users without salt, it will be generated password (hash) recalculated on the first login.
+Salt property is appended to the password before hashing. For users without salt, it will be generated on the first login.
 
 __Custom configuration__:
 
